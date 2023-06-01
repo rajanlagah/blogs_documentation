@@ -1,2 +1,117 @@
-# NFT Ranking
+## NFT Ranking
 
+import ImgLoader from '../../../components/ImgLoader'
+
+<ImgLoader type="nft_landing_page" />
+
+###  Project description
+For past many years we see increase intrest in NFTs. Which is good thing but due this marketplace is now flooded with Millions of NFTs.
+Most of which wont give you any return. So now problem is how will you find best NFT to buy? 
+
+Marketplaces now days are doing ranking system which calculates rarity of NFT. Higher the score more likely that NFT will give better returns.
+Even if you dont care about returns you want to have rare and special NFT to buy.
+
+In this project I did same thing. I took 1 [Impostors Genesis Aliens](https://opensea.io/collection/impostors-genesis-aliens) collection and sort them on the basis of thier rarity
+
+> I have also implemented infinte scroll and load images automatically when someone reaches the end of the page.
+
+### Technologies used
+- Nextjs
+- Moralis
+- Python
+- Pandas
+
+### Flow
+
+![NFT Landing page flow diagram](/UserFlows/NFT_Ranking.png)
+
+### Code walk through
+
+[GitHub ↗](https://github.com/rajanlagah/NFTRanking/tree/main)
+
+*Python code to import NFTs*
+
+```python {2,19}
+for x in range(noOfReqs):
+    result = evm_api.nft.get_contract_nfts(
+        api_key,
+        params={
+            "address":nftContract,
+            "chain":"eth",
+            "cursor": cursor
+        }
+    )
+
+    cursor = result["cursor"]
+    df2 = json_normalize(result["result"])
+
+    if(df.empty):
+        df = df2
+    else:
+        df = pd.concat([df,df2])
+    print(x + 1, " / ", noOfReqs)
+    time.sleep(0.21)
+```
+We are calling Moralis EVM apis and those have ratelimit so to we added sleep time after which we call Moralis API to prevent quota breach.
+
+*JS component to fetch more imgs on page end*
+
+```javascript {23}
+import React, { useEffect, useRef } from "react";
+import styles from "./../styles/Home.module.css";
+
+const LoadMoreImgs = ({ cb, isCbLoading, cursor }) => {
+  const loadingBtnRef = useRef();
+
+  useEffect(() => {
+    const threshHold = window.screen.height + 450;
+    const debouncedAPICall = debouncing(cb, functionDelay);
+    const onScroll = (e) => {
+      const loadingBtnLocation =
+        loadingBtnRef.current.getBoundingClientRect().y;
+      if (loadingBtnLocation < threshHold && !isCbLoading) {
+        debouncedAPICall();
+      }
+    };
+    window.addEventListener("scroll", onScroll);
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [cursor]);
+
+  const functionDelay = 500; // ms
+  const debouncing = (fn, delay) => {
+    let timer;
+    return () => {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        fn(cursor);
+      }, delay);
+    };
+  };
+
+  return (
+    <div ref={loadingBtnRef} className={styles["im-card"]}>
+      .
+    </div>
+  );
+};
+
+export default LoadMoreImgs;
+```
+
+- We are using `scroll` event to detect user scrolling.
+- we have 450px of threshHold which means imgs will start loading when current page end is 450px below the bottom of visible screen
+- We have debounce function which ensure we are not calling API to fetch data multiple times on threshHold breach.
+
+### Ranking logic
+1. Calculate Number of NFTs ( T )
+2. Calculate Number of NFTs having perticular feature ( lets say it F1 )
+3. Do it for features score ( 1/(F1/T) and call it S1 now F1 have score S1)
+4. Calculate score for all features (  S1 , S2 , S3 .... )
+5. List features available in NFT ( lets say NFT_1 have F1 , F3 , F4 and F10 features)
+6. Calculate score by S1 + S3 + S4 + S10
+
+### Future scope
+Right now I am using only 1 collection. But we can 
+1. Do same for more collections so users have option to choose collections.
+2. Take NFT collection address from user as input then calculates and display results for that NFT collection.
