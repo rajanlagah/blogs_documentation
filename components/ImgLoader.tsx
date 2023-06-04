@@ -25,7 +25,7 @@ const ImgLoader = ({type}) =>  {
   return (
     <figure style={{textAlign:"center"}}>
       <img src={TYPE_TO_IMG_MAP[type].src} />
-      <a className={styles["img-caption-demo"]} href={TYPE_TO_IMG_MAP[type].url}>Visit website ↗</a>
+      <a className={styles["img-caption-demo"]} target='blank' href={TYPE_TO_IMG_MAP[type].url}>Visit website ↗</a>
     </figure>
   )
 }
