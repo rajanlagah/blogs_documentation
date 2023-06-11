@@ -1,0 +1,130 @@
+### Decentralized Lottery
+
+
+import ImgLoader from '../../../components/ImgLoader'
+
+<ImgLoader type="Lottery_landing" />
+
+
+Gorile **[Depricated]** [demo](https://tiny-dew-2052.on.fleek.co/)
+
+[Contract](https://sepolia.etherscan.io/address/0x0c88a4e3e3bf9272f15f41de9674277de15ce867)
+
+[Code](https://github.com/rajanlagah/hh-lottery-smart-contract)
+
+### Testnet
+Sepolia [Active]
+
+Goerli [Depricated]
+
+### 🧑‍💻Technology used
+- solidity
+- nextjs
+- chainlink
+- hardhat
+- metamask
+- mocha
+- chai
+- react-moralis
+- web3uikit
+- fleek.com
+### ⚙️ How it work
+This project have 3 components 
+1. Smart contract
+2. Smart contract tests
+3. Nextjs frontend
+
+#### Smart Contract
+Its writing in solidity ^0.8. It allow user to make payment in SepoliaETH (or hardhat Eth ) and then it store user address and we call them player. After the set time (1 hour) it chainlink keepers ( now automation.chainlink ) run cron job and if number of players is > 0 then automation.chainlink will run performUpKeep function which will call random number function given by chainlink's VRF and after process we will receive random number in fulfillRandomWords fn. This random number will be the index of winner in player array and all the balance of contract will be transfered to winner.
+
+#### 🧐 Smart contract tests
+2 sets of testing
+##### 1. Unit testing
+These tests each function on local hardhat node. On local we are calling `fulfillRandomWords` fn manually.
+
+```
+hh test
+```
+
+##### 2. Staging tests
+In this we are testing e2e flow of user journey from entering the game to game results. This is done on Sepolia test net.
+
+network-name = hardhat | localhost | goerli | sepolia
+
+```
+hh test --network network-name
+```
+
+#### Nextjs frontend
+Intractive UI that make it easy to enter game. We have used react-moralis to intract with smart contract and web3uikit for pre-built UI components.
+
+### 🚀 Installation and Deployment 
+[Read here](https://github.com/rajanlagah/hh-lottery-smart-contract#installation)
+
+####  🏆  Wall of Code
+
+- Generating Random values in decentralized manner.
+> To learn how to genrate random number in decentralized manner using chainlink go [here](/Blogs/Blockchain/Generate_Random_number)
+
+In this code we are calling `requestRandomWords` fn of chainlink `VRFCoordinatorV2Interface`.
+
+```solidity
+ uint256 _requestId = i_vrfCordinator.requestRandomWords(
+        i_gasLane,
+        i_subscriptionId,
+        RANDOM_REQUEST_NUMBER_CONFIRMATION,
+        i_callbackGasLimit,
+        RANDOM_NUMBER
+    );
+emit RequestedRaffleWinner(_requestId);
+```
+after requesting random number. Chainlink will run `fulfillRandomWords` function where we can handle the random number.
+
+```solidity
+ function fulfillRandomWords(
+        uint256, // _requestId,
+        uint256[] memory _randomWords
+    ) internal override {
+        s_raffleState = RaffleState.OPEN;
+        uint256 winnerIndex = _randomWords[0] % s_players.length;
+        address payable winner = s_players[winnerIndex];
+        s_players = new address payable[](0);
+        s_timeOfLastReset = block.timestamp;
+        s_winner = winner;
+        (bool success, ) = winner.call{value: address(this).balance}("");
+
+        if (!success) {
+            revert Raffle__WithdrawalFail();
+        }
+        emit WinnersPicked(winner);
+    }
+```
+
+- Calculate results after game over
+
+We are using chainlink automation which will run cron and call `performUpKeep` in this contract.
+In our performUpkeep we are checking first if game is over or not. If game is over we will fetch random number and publish the results.
+> To learn how to integrate chainlink automation read [here](/Blogs/Blockchain/Chainlink_Automation)
+
+```solidity
+ function performUpkeep(bytes calldata /* performData */) external override {
+    (bool upkeepNeeded, ) = checkUpkeep("");
+    if (!upkeepNeeded) {
+        revert Raffle__UpkeepNotNeeded(
+            address(this).balance,
+            s_players.length,
+            uint256(s_raffleState)
+        );
+    }
+
+    s_raffleState = RaffleState.CALCULATING;
+    uint256 _requestId = i_vrfCordinator.requestRandomWords(
+        i_gasLane,
+        i_subscriptionId,
+        RANDOM_REQUEST_NUMBER_CONFIRMATION,
+        i_callbackGasLimit,
+        RANDOM_NUMBER
+    );
+    emit RequestedRaffleWinner(_requestId);
+}
+```
