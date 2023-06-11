@@ -19,6 +19,9 @@ const ImgLoader = ({type}) =>  {
     paypal_landing_page: {
       url:"https://paypal-decentralized.vercel.app",
       src:"/Paypal/PayPal_LandingPage_1.png"
+    },Lottery_landing:{
+      url:"https://hh-lottery-smart-contract.vercel.app/",
+      src:"/Lottery_landing.png"
     }
   }
 
