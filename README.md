@@ -1,23 +1,16 @@
-# Nextra Docs Template 
+# RJ Docs
 
-This is a template for creating documentation with [Nextra](https://nextra.site).
+[**Read Docs →**](https://rj-docs.vercel.app)
 
-[**Live Demo →**](https://nextra-docs-template.vercel.app)
-
-[![](.github/screenshot.png)](https://nextra-docs-template.vercel.app)
-
-## Quick Start
-
-Click the button to clone this repository and deploy it on Vercel:
-
-[![](https://vercel.com/button)](https://vercel.com/new/clone?s=https%3A%2F%2Fgithub.com%2Fshuding%2Fnextra-docs-template&showOptionalTeamCreation=false)
-
-## Local Development
-
-First, run `pnpm i` to install the dependencies.
-
-Then, run `pnpm dev` to start the development server and visit localhost:3000.
-
+## Introduction
+Here you will find
+- Blogs
+- Documentation
+- Projects walkthrough
+- Projects Demo 
 ## License
 
 This project is licensed under the MIT License.
+
+
+This is a template for creating documentation with [Nextra](https://nextra.site).
